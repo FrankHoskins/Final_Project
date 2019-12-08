@@ -20,6 +20,7 @@ function apiError(obj) {
 // Populates temperatureTiles with current temperatures reported by observation stations.
 window.onload = function() {
 	httpRequest.open("GET", "https://api.weather.gov/points/" + defaultCoordinates, true);
+	try {
 	httpRequest.onload = (function() {
 		if (httpRequest.status != 200) { requestError(); return; }
 		let responseObj = JSON.parse(httpRequest.responseText);
@@ -53,6 +54,10 @@ window.onload = function() {
 		})
 		httpRequest.send(null);
 	})
+	} catch { 
+		console.log("Temperature Error."); 
+		temperatureTiles.push({"Position": [39.1155, -94.6268], "Temperature": "There was an error while retreiving temperatures."}); 
+	}
 	httpRequest.send(null);
 
 	// Fetch 7 day forecast
@@ -63,17 +68,17 @@ window.onload = function() {
 		let forecastObj = JSON.parse(forecastRequest.responseText);
 		let iconNames = ["clear","cloudy", "partly sunny","rain","snow","windy","sunny"];
 		let currentName = 0;
-		for (let i = 0; i < 14; i++) {
-			console.log(i + " " + currentName);
-			getClass("forecastTitle")[i % 7].innerHTML = forecastObj.properties.periods[(i % 7)+1].name;
-			getClass("forecastDescription")[i % 7].innerHTML = forecastObj.properties.periods[(i % 7)+1].detailedForecast;
+		for (let i = 0; i < 7; i++) {
+			getClass("forecastTitle")[i].innerHTML = forecastObj.properties.periods[currentName].name;
+			getClass("forecastDescription")[i].innerHTML = forecastObj.properties.periods[currentName].detailedForecast;
 			getClass("forecastTemperature")[i].innerHTML = forecastObj.properties.periods[i].temperature + " °F";
 			for (let z = 0; z < iconNames.length; z++) {
-				if (forecastObj.properties.periods[(i % 7)+1].detailedForecast.search(iconNames[z]) != -1) {
-					getClass("forecastIcon")[i % 7].src = "icons/" + iconNames[z] + ".png";
+				if (forecastObj.properties.periods[currentName].detailedForecast.search(iconNames[z]) != -1) {
+					getClass("forecastIcon")[i].src = "icons/" + iconNames[z] + ".png";
 					break;
 				}
 			}
+			currentName = currentName + 2;
 		}
 	})
 	forecastRequest.send(null);
@@ -81,7 +86,7 @@ window.onload = function() {
 	// Event functions
 
 	// Temperature
-	getClass("radarOption")[0].onclick = (function() {
+	getClass("radarOption")[0].addEventListener("click", function() {
 		if (getClass("radarOption")[0].style.color == "green") { return; }
 		getClass("radarOption")[0].style = "color: green"; getClass("radarOption")[1].style = "color: red;"; getClass("radarOption")[2].style = "color: red;";
 		
@@ -110,8 +115,7 @@ window.onload = function() {
 	})
 
 	// Active Weather
-	getClass("radarOption")[1].onclick = (function() {
-
+	getClass("radarOption")[1].addEventListener("click", function() {
 		if (getClass("radarOption")[1].style.color == "green") { return; }
 		getClass("radarOption")[1].style = "color: green"; getClass("radarOption")[0].style = "color: red;"; getClass("radarOption")[2].style = "color: red;";
 	
@@ -128,7 +132,7 @@ window.onload = function() {
 	})
 
 	// Precipitation
-	getClass("radarOption")[2].onclick = (function() {
+	getClass("radarOption")[2].addEventListener("click", function() {
 		if (getClass("radarOption")[2].style.color == "green") { return; }
 		getClass("radarOption")[2].style = "color: green"; getClass("radarOption")[0].style = "color: red;"; getClass("radarOption")[1].style = "color: red;";
 
