@@ -4,8 +4,8 @@ var weatherTiles;
 var precipitationTiles;
 var temperatureTiles = [];
 var temperatureMarkers = [];
-var stationRequests = [];
 var defaultCoordinates = "39.1155,-94.6268";
+var temperatureLoaded = false;
 var httpRequest = new XMLHttpRequest();
 var getClass = document.getElementsByClassName.bind(document);
 
@@ -17,8 +17,7 @@ function apiError(obj) {
 	alert("API Error - Temperatures not avaiable."); 
 } 
 
-// Populates temperatureTiles with current temperatures reported by observation stations.
-window.onload = function() {
+function fetchTemperatures() {
 	httpRequest.open("GET", "https://api.weather.gov/points/" + defaultCoordinates, true);
 	try {
 	httpRequest.onload = (function() {
@@ -51,6 +50,7 @@ window.onload = function() {
 				temperatureTiles.push(tempWeather);
 				localRequest.abort();
 			}
+			temperatureLoaded = true; getClass("radarOption")[0].click();
 		})
 		httpRequest.send(null);
 	})
@@ -59,8 +59,10 @@ window.onload = function() {
 		temperatureTiles.push({"Position": [39.1155, -94.6268], "Temperature": "There was an error while retreiving temperatures."}); 
 	}
 	httpRequest.send(null);
+}
 
-	// Fetch 7 day forecast
+// Retrieves the 7 day forecast and sets up event listeners
+window.onload = function() {
 	let forecastRequest = new XMLHttpRequest();
 	forecastRequest.open("GET", "https://api.weather.gov/gridpoints/EAX/41,50/forecast", true);
 	forecastRequest.onload = (function() {
@@ -78,7 +80,7 @@ window.onload = function() {
 					break;
 				}
 			}
-			currentName = currentName + 2;
+			if (forecastObj.properties.periods[currentName].name == "Tonight") { currentName++; } else { currentName = currentName + 2; }
 		}
 	})
 	forecastRequest.send(null);
@@ -87,6 +89,8 @@ window.onload = function() {
 
 	// Temperature
 	getClass("radarOption")[0].addEventListener("click", function() {
+		if (!temperatureLoaded) { alert("Retrieving temperatures. This may take a moment.\n(Page may become unresponsive for a few seconds.)"); fetchTemperatures(); return; }
+
 		if (getClass("radarOption")[0].style.color == "green") { return; }
 		getClass("radarOption")[0].style = "color: green"; getClass("radarOption")[1].style = "color: red;"; getClass("radarOption")[2].style = "color: red;";
 		
