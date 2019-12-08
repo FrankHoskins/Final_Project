@@ -3,6 +3,10 @@ p { margin-top: 10px; margin-bottom: 10px; }
 b { margin-left: 100px; margin-top: 10px; }
 
 
+.endNote {
+	font-size: 18px;
+}
+
 .radarOption {
 	width: 10%;
 	height: 50px;
