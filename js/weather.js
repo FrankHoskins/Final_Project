@@ -109,10 +109,10 @@ window.onload = function () {
 					break;
 				}
 			}
-			if (forecastObj.properties.periods[currentName].name == "Tonight" || forecastObj.properties.periods[currentName].name == "Overnight") {
+			currentName++;
+			while (true) {
+				if (forecastObj.properties.periods[currentName].name.split(' ').length == 1) { break; }
 				currentName++;
-			} else {
-				currentName = currentName + 2;
 			}
 		}
 	})
